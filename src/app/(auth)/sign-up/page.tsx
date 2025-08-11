@@ -12,11 +12,11 @@
 
 // //https://localhoast:3000/sign-up
 
-import { SignupView } from "@/modules/auth/ui/views/sign-up-view";
+import { SignUpView } from "@/modules/auth/ui/views/sign-up-view";
 const page = () => {
 
     return (
-        <SignupView />
+        <SignUpView />
     );
 }
 export default page;
