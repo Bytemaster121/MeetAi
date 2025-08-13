@@ -45,7 +45,7 @@ const formSchema = z.object({
 
 export const SignUpView = () => {
 
-  const router =useRouter();
+  // const router =useRouter(); as we are using callbackURL in authClient, we don't need to use router here
   const [error , setError] = useState<string | null>(null);
   const [pending , setPending] = useState(false);
 
@@ -69,7 +69,8 @@ export const SignUpView = () => {
       authClient.signUp.email({
       name: data.name, 
       email: data.email, 
-      password: data.password 
+      password: data.password ,
+      callbackURL: "/",
       },
       {
         onSuccess: () => {
@@ -82,6 +83,27 @@ export const SignUpView = () => {
       }
       );
   };
+
+  const onSocial = (provider : "github" | "google") => {
+      setError(null);
+      setPending(true);
+      authClient.signIn.social(
+        { provider,
+          callbackURL: "/",
+        },
+        {
+          onSuccess: () => {
+            setPending(false);
+          },
+          onError: (error) => {
+            setPending(false);
+            setError(error.error.message);
+          },
+        }
+      );
+  };
+
+
   return (
     <div className="flex flex-col gap-6">
       <Card className="overflow-hidden p-0">
@@ -188,6 +210,8 @@ export const SignUpView = () => {
               <div className="grid grid-cols-2 gap4">
                 <Button 
                   disabled={pending}
+                  onClick= { () => onSocial("google") }
+
                   variant={"outline"}
                   type="button"
                   className="w-full"
@@ -197,6 +221,7 @@ export const SignUpView = () => {
 
                 <Button 
                   disabled={pending}
+                  onClick={ () => onSocial("github") }
                   variant={"outline"}
                   type="button"
                   className="w-full"
