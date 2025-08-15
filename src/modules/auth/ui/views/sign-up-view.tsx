@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Alert , AlertTitle } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
 import { authClient } from "@/lib/auth-client";
+import { FaGithub  , FaGoogle } from "react-icons/fa";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -48,8 +50,9 @@ export const SignUpView = () => {
   // const router =useRouter(); as we are using callbackURL in authClient, we don't need to use router here
   const [error , setError] = useState<string | null>(null);
   const [pending , setPending] = useState(false);
-
   
+  const router = useRouter();
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,6 +78,7 @@ export const SignUpView = () => {
       {
         onSuccess: () => {
           setPending(false);
+          router.push("/");
         },
         onError: (error) => {
           setPending(false);
@@ -207,7 +211,7 @@ export const SignUpView = () => {
                 Or continue with
               </span>
               </div>
-              <div className="grid grid-cols-2 gap4">
+              <div className="grid grid-cols-2 gap-4">
                 <Button 
                   disabled={pending}
                   onClick= { () => onSocial("google") }
@@ -216,6 +220,7 @@ export const SignUpView = () => {
                   type="button"
                   className="w-full"
                 >
+                  <FaGoogle className="mr-2" />
                   Google
                 </Button> 
 
@@ -226,6 +231,7 @@ export const SignUpView = () => {
                   type="button"
                   className="w-full"
                 >
+                  <FaGithub className="mr-2" />
                   Github
                 </Button>
               </div>
