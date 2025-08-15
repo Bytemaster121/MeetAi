@@ -8,6 +8,7 @@ import { Alert , AlertTitle } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { FaGithub  , FaGoogle } from "react-icons/fa";
 import { useState } from "react";
 import {
   Form,
@@ -39,6 +40,7 @@ export const SignInView = () => {
   // const router =useRouter(); because we are using callbackURL in authClient, we don't need to use router here
   const [error , setError] = useState<string | null>(null);
   const [pending , setPending] = useState(false);
+  const router = useRouter();
 
   
 
@@ -64,6 +66,7 @@ export const SignInView = () => {
       {
         onSuccess: () => {
           setPending(false);
+          router.push("/");
         },
         onError: (error) => {
           setPending(false);
@@ -164,7 +167,7 @@ export const SignInView = () => {
                 Or continue with
               </span>
               </div>
-              <div className="grid grid-cols-2 gap4">
+              <div className="grid grid-cols-2 gap-4">
                 <Button 
                   disabled={pending}
                   onClick={ () => onSocial("google")}
@@ -172,6 +175,7 @@ export const SignInView = () => {
                   type="button"
                   className="w-full"
                 >
+                  <FaGoogle className="mr-2" />
                   Google
                 </Button>
                 <Button 
@@ -181,6 +185,7 @@ export const SignInView = () => {
                   type="button"
                   className="w-full"
                 >
+                  <FaGithub className="mr-2" />
                   Github
                 </Button>
               </div>
