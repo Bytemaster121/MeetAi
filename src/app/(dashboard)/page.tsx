@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 
 const page = async () => {
   const session = await auth.api.getSession({
-    headers: headers(), // No need to await headers()
+    headers: await headers(), // Await headers() since it returns a Promise
   });
 
   if (!session) {
