@@ -2,8 +2,19 @@ import { createTRPCRouter, baseProcedure, protectedProcedure } from "@/trpc/init
 import { db } from "@/db";
 import { agents } from "@/db/schema";
 import { agentsInsertSchema } from "../schema";
+import z from "zod";
+import { eq } from "drizzle-orm";
+import { Input } from "@/components/ui/input";
+
 
 export const agentsRouter = createTRPCRouter({
+
+   getOne: baseProcedure.input(z.object({id: z.string()})).query(async ({input }) => {
+    const [existingAgent] = await db.select().from(agents).where(eq(agents.id , input.id));
+
+    return existingAgent;
+    
+  }),
   getMany: baseProcedure.query(async () => {
     const data = await db.select().from(agents);
     return data;
