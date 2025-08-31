@@ -4,22 +4,30 @@ import { agents } from "@/db/schema";
 import { agentsInsertSchema } from "../schema";
 import z from "zod";
 import { eq } from "drizzle-orm";
-import { Input } from "@/components/ui/input";
-
 
 export const agentsRouter = createTRPCRouter({
+  // ✅ Fetch a single agent by ID
+  getOne: baseProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const [existingAgent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.id, input.id));
 
-   getOne: baseProcedure.input(z.object({id: z.string()})).query(async ({input }) => {
-    const [existingAgent] = await db.select().from(agents).where(eq(agents.id , input.id));
+      return existingAgent;
+    }),
 
-    return existingAgent;
-    
-  }),
-  getMany: baseProcedure.query(async () => {
-    const data = await db.select().from(agents);
+  // ✅ Fetch all agents for the authenticated user
+  getMany: protectedProcedure.query(async ({ ctx }) => {
+    const data = await db
+      .select()
+      .from(agents)
+      .where(eq(agents.userId, ctx.auth.user.id)); // ✅ filter by userId
     return data;
   }),
 
+  // ✅ Create a new agent for the authenticated user
   create: protectedProcedure
     .input(agentsInsertSchema)
     .mutation(async ({ input, ctx }) => {
@@ -27,7 +35,7 @@ export const agentsRouter = createTRPCRouter({
         .insert(agents)
         .values({
           ...input,
-          userId: ctx.auth.user.id,
+          userId: ctx.auth.user.id, // ✅ associate agent with user
         })
         .returning();
 

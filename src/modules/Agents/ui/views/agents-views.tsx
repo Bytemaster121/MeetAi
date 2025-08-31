@@ -1,46 +1,44 @@
-"use client"
+"use client";
+
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
-import { ResponsiveDialog } from "@/components/responsive-dialogs";
-import { Button } from "@/components/ui/button";
-import { useTRPC } from "@/trpc/client";
-import {  useSuspenseQuery } from "@tanstack/react-query";
 
 export const AgentsView = () => {
-    const trpc = useTRPC();
-    const { data} = useSuspenseQuery(trpc.agents.getMany.queryOptions());
-    return (
-        <div>
-           {/* <ResponsiveDialog
-           title = "responsive test"
-           description = "description"
-           open 
-           onOpenChange={() => {}}
-           >
-            <Button>
-                some actions 
-            </Button>
+  const trpc = useTRPC();
 
-           </ResponsiveDialog> */}
-            {JSON.stringify(data, null, 2)}
+  const { data, isLoading, isError } = useQuery({
+    ...trpc.agents.getMany.queryOptions(),
+    refetchOnMount: true, // ✅ ensures refetch after agent creation
+    refetchOnWindowFocus: false, // optional: prevents refetch on tab switch
+  });
+
+  if (isLoading) return <AgentsViewLoading />;
+  if (isError) return <AgentsViewError />;
+
+  return (
+    <div className="grid gap-4">
+      {data?.map((agent) => (
+        <div key={agent.id} className="border p-4 rounded">
+          <h3 className="font-semibold">{agent.name}</h3>
+          <p className="text-sm text-muted-foreground">{agent.instruction}</p>
         </div>
-    );
+      ))}
+    </div>
+  );
 };
 
-export const AgentsViewLoading = () =>{
-    return (
-        <LoadingState 
-          title="Loading Agents"
-          description="This may take a fews secnad "
-        />
-    )
-};
+export const AgentsViewLoading = () => (
+  <LoadingState
+    title="Loading Agents"
+    description="This may take a few seconds..."
+  />
+);
 
-export const AgentsViewError = () =>{
-    return (
-        <ErrorState
-          title=" Error in Loading Agents"
-          description="Something went wrong "
-        />
-    )
-};
+export const AgentsViewError = () => (
+  <ErrorState
+    title="Error Loading Agents"
+    description="Something went wrong while fetching agents."
+  />
+);
