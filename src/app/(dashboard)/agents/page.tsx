@@ -15,13 +15,16 @@ export default async function AgentsPage() {
   const dehydratedState = dehydrate(queryClient);
 
   return (
+    <>
+    <AgentsListHeader/>
     <HydrationBoundary state={dehydratedState}>
-      <AgentsListHeader />
+
       <Suspense fallback={<AgentsViewLoading />}>
         <ErrorBoundary errorComponent={AgentsViewError}>
           <AgentsView />
         </ErrorBoundary>
       </Suspense>
     </HydrationBoundary>
+    </>
   );
 }

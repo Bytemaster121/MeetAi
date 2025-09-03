@@ -1,8 +1,8 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
+import { trpc } from "@/trpc/client"; // ✅ use trpc directly, not useTRPC()
 import { AgentsGetOne } from "../../types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { agentsInsertSchema } from "../../schema";
@@ -32,19 +32,22 @@ export const AgentsForm = ({
   onCancel,
   initialValues,
 }: AgentsFormProps) => {
-  const trpc = useTRPC(); // ✅ context-aware client
   const queryClient = useQueryClient();
-  const isEdit = !!initialValues?.id;
 
-  const createAgent = useMutation({
-    mutationFn: (input: z.infer<typeof agentsInsertSchema>) =>
-      trpc.agents.create.mutate(input),
+  const createAgent = trpc.agents.create.useMutation({
     onSuccess: async () => {
-      const queryKey = trpc.agents.getMany.queryOptions().queryKey;
-      console.log("Invalidating queryKey:", queryKey);
+      // ✅ use queryKey directly instead of queryOptions()
+      await queryClient.invalidateQueries({
+        queryKey: trpc.agents.getMany.queryKey,
+      });
 
-      await queryClient.invalidateQueries({ queryKey });
-      toast.success("Agent created successfully!");
+      if (initialValues?.id) {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.agents.getOne.queryKey({ id: initialValues.id }),
+        });
+      }
+
+      toast.success("Agent saved!");
       onSuccess?.();
     },
     onError: (error) => {
@@ -60,9 +63,12 @@ export const AgentsForm = ({
     },
   });
 
+  const isEdit = Boolean(initialValues?.id);
+  const isPending = createAgent.isLoading;
+
   const onSubmit = (values: z.infer<typeof agentsInsertSchema>) => {
     if (isEdit) {
-      console.log("TODO: Update agent logic here");
+      console.log("TODO: wire up update mutation");
     } else {
       createAgent.mutate(values);
     }
@@ -100,7 +106,7 @@ export const AgentsForm = ({
               <FormControl>
                 <Textarea
                   {...field}
-                  placeholder="You are a helpful math assistant that can answer questions and help with tasks."
+                  placeholder="You are a helpful assistant…"
                 />
               </FormControl>
               <FormMessage />
@@ -109,14 +115,19 @@ export const AgentsForm = ({
         />
 
         <div className="flex justify-between gap-2">
-          <Button type="submit" disabled={createAgent.isPending}>
-            {isEdit ? "Update Agent" : "Create Agent"}
-          </Button>
           {onCancel && (
-            <Button type="button" variant="ghost" onClick={onCancel}>
+            <Button
+              variant="ghost"
+              disabled={isPending}
+              type="button"
+              onClick={() => onCancel()}
+            >
               Cancel
             </Button>
           )}
+          <Button disabled={isPending} type="submit">
+            {isEdit ? "Update" : "Create"}
+          </Button>
         </div>
       </form>
     </Form>
