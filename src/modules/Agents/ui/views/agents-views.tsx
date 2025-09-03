@@ -1,17 +1,14 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
+import { trpc } from "@/trpc/client";
 import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
 
 export const AgentsView = () => {
-  const trpc = useTRPC();
-
-  const { data, isLoading, isError } = useQuery({
-    ...trpc.agents.getMany.queryOptions(),
-    refetchOnMount: true, // ✅ ensures refetch after agent creation
-    refetchOnWindowFocus: false, // optional: prevents refetch on tab switch
+  // ✅ use tRPC’s generated hook directly
+  const { data, isLoading, isError } = trpc.agents.getMany.useQuery(undefined, {
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   if (isLoading) return <AgentsViewLoading />;
