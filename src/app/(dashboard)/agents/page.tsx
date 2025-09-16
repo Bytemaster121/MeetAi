@@ -12,6 +12,18 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+/**
+ * Server component that renders the Agents page with server-side auth gating and prefetched data.
+ *
+ * Checks the current user session on the server and redirects to `/sign-in` when unauthenticated.
+ * When authenticated, it prefetches the `agents.getMany` TRPC query into a React Query client,
+ * dehydrates that state for client hydration, and renders the page UI.
+ *
+ * The rendered tree always includes the agents list header and a HydrationBoundary containing
+ * a Suspense fallback (AgentsViewLoading) and an ErrorBoundary (AgentsViewError) around AgentsView.
+ *
+ * @returns A React element for the Agents page (server component) with prehydrated query state.
+ */
 export default async function AgentsPage() {
   const session = await auth.api.getSession({ // last line of defence for auth
       headers: await headers(), // Await headers() since it returns a Promise
