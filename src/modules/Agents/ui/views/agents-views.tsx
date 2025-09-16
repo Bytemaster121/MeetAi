@@ -5,6 +5,7 @@ import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
 import { DataTable } from "../Components/Data-table";
 import { columns } from "../Components/Column";
+import { EmptyState } from "@/components/empty-state";
 
 export const AgentsView = () => {
   const { data, isLoading, isError } = trpc.agents.getMany.useQuery(undefined, {
@@ -18,6 +19,15 @@ export const AgentsView = () => {
   return (
     <div className="flex pb-4 px-4 md:px-8 flex-col gap-y-4">
       <DataTable data={data ?? []} columns={columns} />
+
+      {data?.length === 0 && (
+        <div className="mt-8">
+          <EmptyState
+            title="Create your first Agent"
+            description="Agents are AI-powered assistants that can perform tasks on your behalf. Create one to get started!"
+          />
+        </div>
+      )}
     </div>
   );
 };
