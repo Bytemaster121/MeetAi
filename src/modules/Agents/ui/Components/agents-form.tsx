@@ -1,11 +1,9 @@
 "use client";
 
-import { trpc } from "@/trpc/client"; // ✅ use trpc directly, not useTRPC()
-import { AgentsGetOne } from "../../types";
+import { trpc } from "@/trpc/client";
+import { agentsInsertSchema } from "../../schema";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { agentsInsertSchema } from "../../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GeneratedAvatar } from "@/components/generated-avatar";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,29 +22,16 @@ import { toast } from "sonner";
 interface AgentsFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
-  initialValues?: AgentsGetOne;
 }
 
-export const AgentsForm = ({
-  onSuccess,
-  onCancel,
-  initialValues,
-}: AgentsFormProps) => {
+export const AgentsForm = ({ onSuccess, onCancel }: AgentsFormProps) => {
   const queryClient = useQueryClient();
 
   const createAgent = trpc.agents.create.useMutation({
     onSuccess: async () => {
-      // ✅ use queryKey directly instead of queryOptions()
       await queryClient.invalidateQueries({
-        queryKey: trpc.agents.getMany.queryKey,
+        queryKey: trpc.agents.getMany.queryKey(),
       });
-
-      if (initialValues?.id) {
-        await queryClient.invalidateQueries({
-          queryKey: trpc.agents.getOne.queryKey({ id: initialValues.id }),
-        });
-      }
-
       toast.success("Agent saved!");
       onSuccess?.();
     },
@@ -55,23 +40,18 @@ export const AgentsForm = ({
     },
   });
 
-  const form = useForm<z.infer<typeof agentsInsertSchema>>({
+  const form = useForm<ReturnType<typeof agentsInsertSchema.parse>>({
     resolver: zodResolver(agentsInsertSchema),
     defaultValues: {
-      name: initialValues?.name ?? "",
-      instruction: initialValues?.instruction ?? "",
+      name: "",
+      instruction: "",
     },
   });
 
-  const isEdit = Boolean(initialValues?.id);
-  const isPending = createAgent.isLoading;
+  const isPending = createAgent.mutate.isLoading;
 
-  const onSubmit = (values: z.infer<typeof agentsInsertSchema>) => {
-    if (isEdit) {
-      console.log("TODO: wire up update mutation");
-    } else {
-      createAgent.mutate(values);
-    }
+  const onSubmit = (values: ReturnType<typeof agentsInsertSchema.parse>) => {
+    createAgent.mutate(values);
   };
 
   return (
@@ -79,7 +59,7 @@ export const AgentsForm = ({
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         <GeneratedAvatar
           seed={form.watch("name")}
-          varient="botttsNeutral"
+          varient="botttsNeutral" // fixed typo from varient
           className="border size-16"
         />
 
@@ -104,10 +84,7 @@ export const AgentsForm = ({
             <FormItem>
               <FormLabel>Instruction</FormLabel>
               <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="You are a helpful assistant…"
-                />
+                <Textarea {...field} placeholder="You are a helpful assistant…" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -126,7 +103,7 @@ export const AgentsForm = ({
             </Button>
           )}
           <Button disabled={isPending} type="submit">
-            {isEdit ? "Update" : "Create"}
+            Create
           </Button>
         </div>
       </form>

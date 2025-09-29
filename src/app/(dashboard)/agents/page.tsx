@@ -33,7 +33,7 @@ export default async function AgentsPage() {
       redirect("/sign-in"); // ✅ This will now work
     }
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());
+  await queryClient.prefetchQuery(trpc.agents.getMany.queryOptions({}));
   const dehydratedState = dehydrate(queryClient);
 
   return (
