@@ -14,7 +14,7 @@ export const columns: ColumnDef<AgentGetOne>[] = [
       <div className="flex flex-col gap-y-1">
         <div className="flex items-center gap-x-2">
           <GeneratedAvatar
-            variant="botttsNeutral"   // fixed spelling from varient -> variant
+            varient="botttsNeutral"   // fixed spelling from varient -> variant
             seed={row.original.name}
             className="size-6"
           />
