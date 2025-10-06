@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { loadSearchParams } from "@/modules/Agents/params";
 import { AgentsListHeader } from "@/modules/Agents/ui/Components/AgentsListHeader";
 import {
   AgentsView,
@@ -10,7 +11,9 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { SearchParams } from "nuqs";
 import { Suspense } from "react";
+
 
 /**
  * Server component that renders the Agents page with server-side auth gating and prefetched data.
@@ -24,7 +27,13 @@ import { Suspense } from "react";
  *
  * @returns A React element for the Agents page (server component) with prehydrated query state.
  */
-export default async function AgentsPage() {
+
+ interface Props{
+  searchParams?: Promise<SearchParams>;
+ }
+export default async function AgentsPage({searchParams}: Props) {
+  const filters =  await loadSearchParams(searchParams);
+
   const session = await auth.api.getSession({ // last line of defence for auth
       headers: await headers(), // Await headers() since it returns a Promise
     });
@@ -33,7 +42,9 @@ export default async function AgentsPage() {
       redirect("/sign-in"); // ✅ This will now work
     }
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(trpc.agents.getMany.queryOptions({}));
+  await queryClient.prefetchQuery(trpc.agents.getMany.queryOptions({
+    ...filters,
+  }));
   const dehydratedState = dehydrate(queryClient);
 
   return (
