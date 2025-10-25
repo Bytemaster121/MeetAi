@@ -1,5 +1,5 @@
-// src/modules/Agents/ui/views/agents-views.tsx
 "use client";
+
 import { trpc } from "@/trpc/client";
 import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
@@ -8,9 +8,11 @@ import { columns } from "../Components/Column";
 import { EmptyState } from "@/components/empty-state";
 import { useAgentFilters } from "../../hooks/use-agent-filters";
 import { DataPagination } from "../Components/data-pagination";
+import { useRouter } from "next/navigation";
 
 export const AgentsView = () => {
-  const [filters , setfilters] = useAgentFilters(); // { search: "", page: number }
+  const router = useRouter();
+  const [filters, setfilters] = useAgentFilters();
 
   const { data, isLoading, isError } = trpc.agents.getMany.useQuery({
     page: filters.page,
@@ -23,11 +25,15 @@ export const AgentsView = () => {
 
   return (
     <div className="flex pb-4 px-4 md:px-8 flex-col gap-y-4">
-      <DataTable data={data?.items || []} columns={columns} />
+      <DataTable
+        data={data?.items || []}
+        columns={columns}
+        onRowClick={(row) => router.push(`/agents/${row.id}`)} // ✅ Fixed route
+      />
       <DataPagination
-       page = {filters.page}
-        totalPages = {data?.totalPages || 1}
-        onPageChange= {(page) => setfilters({page})}
+        page={filters.page}
+        totalPages={data?.totalPages || 1}
+        onPageChange={(page) => setfilters({ page })}
       />
       {data?.items?.length === 0 && (
         <div className="mt-8">
