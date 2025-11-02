@@ -65,12 +65,10 @@ export const AgentIdViews = ({ agentId }: Props) => {
           OnRemove={handleRemove}
         />
 
-        {/* Agent Details Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border p-6 space-y-4">
-          {/* Agent Avatar */}
           <div className="flex items-center gap-4 pb-4 border-b">
             <GeneratedAvatar
-              variant="botttsNeutral"
+              varient="botttsNeutral"
               seed={data.name}
               className="size-16"
             />
@@ -80,7 +78,6 @@ export const AgentIdViews = ({ agentId }: Props) => {
             </div>
           </div>
 
-          {/* Instructions Section */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Instructions</h2>
             <p className="text-muted-foreground">
@@ -88,7 +85,6 @@ export const AgentIdViews = ({ agentId }: Props) => {
             </p>
           </div>
 
-          {/* Agent Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Agent ID</p>

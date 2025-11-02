@@ -71,7 +71,7 @@ export const AgentsForm = ({ onSuccess, onCancel, initialValues }: AgentsFormPro
           name: "",
           instruction: "",
         },
-  });
+  } as any); // Temporary fix for type issue
 
   const isPending = createAgent.isPending || updateAgent.isPending;
 
@@ -88,7 +88,7 @@ export const AgentsForm = ({ onSuccess, onCancel, initialValues }: AgentsFormPro
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         <GeneratedAvatar
           seed={form.watch("name") || "default"}
-          variant="botttsNeutral"
+          varient="botttsNeutral"
           className="border size-16"
         />
 
